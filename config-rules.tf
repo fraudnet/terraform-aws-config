@@ -210,7 +210,7 @@ resource "aws_config_config_rule" "s3-bucket-public-write-prohibited" {
 }
 
 resource "aws_config_config_rule" "s3-bucket-server-side-encryption-enabled" {
-  count       = var.active == true ? 1 : 0
+  count       = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
   name        = "s3-bucket-server-side-encryption-enabled"
   description = "Checks that your Amazon S3 bucket either has S3 default encryption enabled or that the S3 bucket policy explicitly denies put-object requests without server side encryption."
 
@@ -228,7 +228,7 @@ resource "aws_config_config_rule" "s3-bucket-server-side-encryption-enabled" {
 }
 
 resource "aws_config_remediation_configuration" "s3-bucket-server-side-encryption-enabled" {
-  count            = var.active == true ? 1 : 0
+  count            = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
   config_rule_name = aws_config_config_rule.s3-bucket-server-side-encryption-enabled[0].name
   resource_type    = "AWS::S3::Bucket"
   target_type      = "SSM_DOCUMENT"
@@ -262,7 +262,7 @@ resource "aws_config_remediation_configuration" "s3-bucket-server-side-encryptio
 
 
 resource "aws_config_config_rule" "s3-bucket-versioning-enabled" {
-  count       = var.active == true ? 1 : 0
+  count       = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
   name        = "s3-bucket-versioning-enabled"
   description = "Checks whether versioning is enabled for your S3 buckets."
 
@@ -280,7 +280,7 @@ resource "aws_config_config_rule" "s3-bucket-versioning-enabled" {
 }
 
 resource "aws_config_remediation_configuration" "s3-bucket-versioning-enabled" {
-  count            = var.active == true ? 1 : 0
+  count            = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
   config_rule_name = aws_config_config_rule.s3-bucket-versioning-enabled[0].name
   resource_type    = "AWS::S3::Bucket"
   target_type      = "SSM_DOCUMENT"
