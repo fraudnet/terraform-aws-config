@@ -43,7 +43,7 @@ resource "aws_iam_policy_attachment" "managed-policy" {
   count      = var.active == true ? 1 : 0
   name       = "aws-config-managed-policy-${var.region}"
   roles      = [aws_iam_role.main.0.name]
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSConfigRole"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWS_ConfigRole"
   lifecycle {
     ignore_changes = ["roles"] # multiregional hack
   }
