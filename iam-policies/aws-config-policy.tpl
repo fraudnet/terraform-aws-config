@@ -26,7 +26,9 @@
             "Effect": "Allow",
             "Action": [
                 "s3:PutEncryptionConfiguration",
-                "s3:PutBucketVersioning"
+                "s3:PutBucketVersioning",
+                "s3:PutBucketPolicy",
+                "s3:GetBucketPolicy"
             ],
             "Resource": "*"
         }
