@@ -311,3 +311,45 @@ resource "aws_config_remediation_configuration" "s3-bucket-versioning-enabled" {
     }
   }
 }
+
+resource "aws_config_config_rule" "s3-bucket-ssl-requests-only" {
+  count       = var.active == true ? 1 : 0
+  name        = "s3-bucket-ssl-requests-only"
+  description = "Checks that your S3 buckets connect only via SSL"
+
+  source {
+    owner             = "AWS"
+    source_identifier = "S3_BUCKET_SSL_REQUESTS_ONLY"
+  }
+
+  depends_on = [aws_config_configuration_recorder.main]
+}
+
+resource "aws_config_remediation_configuration" "s3-bucket-ssl-requests-only" {
+  count            = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
+  config_rule_name = aws_config_config_rule.s3-bucket-ssl-requests-only[0].name
+  resource_type    = "AWS::S3::Bucket"
+  target_type      = "SSM_DOCUMENT"
+  target_id        = "AWSConfigRemediation-RestrictBucketSSLRequestsOnly"
+  target_version   = "2"
+
+  parameter {
+    name         = "AutomationAssumeRole"
+    static_value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-config-role-${var.region}"
+  }
+  parameter {
+    name           = "BucketName"
+    resource_value = "RESOURCE_ID"
+  }
+
+  automatic                  = true
+  maximum_automatic_attempts = 5
+  retry_attempt_seconds      = 600
+
+  execution_controls {
+    ssm_controls {
+      concurrent_execution_rate_percentage = 10
+      error_percentage                     = 20
+    }
+  }
+}
