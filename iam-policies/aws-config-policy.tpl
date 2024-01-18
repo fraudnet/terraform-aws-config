@@ -28,7 +28,9 @@
                 "s3:PutEncryptionConfiguration",
                 "s3:PutBucketVersioning",
                 "s3:PutBucketPolicy",
-                "s3:GetBucketPolicy"
+                "s3:GetBucketPolicy",
+                "s3:PutLifecycleConfiguration",
+                "s3:GetLifecycleConfiguration"
             ],
             "Resource": "*"
         }

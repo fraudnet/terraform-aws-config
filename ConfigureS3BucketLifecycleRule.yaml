@@ -1,0 +1,94 @@
+# https://github.com/tiksangng/aws-community-resources/blob/main/config-remediation/s3-lifecycle-rule/ConfigureS3BucketLifecycleRule.yaml
+description: |
+  ### Document Name - ConfigureS3BucketLifecycleRule
+
+  ## What does this document do?
+  This document is used to create or modify the lifecycle rule configuration for an Amazon S3 bucket.
+
+  ## Output Parameters
+  * GetBucketLifecycleConfiguration.Output - JSON formatted response from the GetBucketLifecycleConfiguration API call
+schemaVersion: "0.3"
+assumeRole: "{{ AutomationAssumeRole }}"
+outputs:
+  - GetBucketLifecycleConfiguration.Output
+parameters:
+  BucketName:
+    type: String
+    description: (Required) Name of the S3 bucket (not the ARN).
+    allowedPattern: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
+  NoncurrentDays:
+    type: Integer
+    description: (Optional) Number of days after becoming noncurrent when objects are deleted.
+    default: 90
+  AutomationAssumeRole:
+    type: String
+    description: (Required) ARN of the role that allows Automation to perform the actions
+    allowedPattern: ^arn:(aws[a-zA-Z-]*)?:iam::\d{12}:role/[\w+=,.@-]+
+mainSteps:
+  - name: PutBucketLifecycleConfiguration
+    action: "aws:executeAwsApi"
+    description: |
+      ## PutBucketLifecycleConfiguration
+      Creates or modifies the lifecycle configuration for a S3 Bucket.
+    isEnd: false
+    inputs:
+      Service: s3
+      Api: PutBucketLifecycleConfiguration
+      Bucket: "{{BucketName}}"
+      LifecycleConfiguration:
+        Rules:
+          - Filter:
+              Prefix: ""
+            ID: "Default Lifecycle Rule"
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: "{{ NoncurrentDays }}"
+    isCritical: true
+    maxAttempts: 2
+    timeoutSeconds: 600
+  - name: GetBucketLifecycleConfiguration
+    action: "aws:executeScript"
+    description: |
+      ## GetBucketLifecycleConfiguration
+      Retrieves the S3 lifecycle configuration for a S3 Bucket.
+      ## Outputs
+      * Output: JSON formatted response from the GetBucketLifecycleConfiguration API call.
+    timeoutSeconds: 600
+    isCritical: true
+    isEnd: true
+    inputs:
+      Runtime: python3.8
+      Handler: validate_s3_bucket_lifecycle_configuration
+      InputPayload:
+        Bucket: "{{BucketName}}"
+        NoncurrentDays: "{{ NoncurrentDays }}"
+      Script: |-
+        import boto3
+
+        def validate_s3_bucket_lifecycle_configuration(event, context):
+            s3_client = boto3.client("s3")
+            bucket = event["Bucket"]
+            noncurrent_expiration_days = event["NoncurrentDays"]
+
+            output = s3_client.get_bucket_lifecycle_configuration(Bucket=bucket)
+            updated_rules = output["Rules"]
+
+            if any(
+                updated_rule["NoncurrentVersionExpiration"]["NoncurrentDays"] == noncurrent_expiration_days
+                and updated_rule["Status"] == "Enabled"
+                for updated_rule in updated_rules
+            ):
+                return {
+                    "output":
+                    {
+                        "message": "Bucket lifecycle configuration successfully set.",
+                        "configuration": updated_rules
+                    }
+                }
+            else:
+                info = f"CONFIGURATION VALUES DO NOT MATCH WITH PARAMETERS PROVIDED VALUES NoncurrentDays: noncurrent_expiration_days, {updated_rules}"
+                raise Exception(info)
+    outputs:
+      - Name: Output
+        Selector: $.Payload.output
+        Type: StringMap
