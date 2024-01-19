@@ -1,0 +1,78 @@
+description: |
+
+  ## What does this document do?
+  Based the bucket name this document add tag. 
+  - If bucket has Sagemaker in name, the cost tag is DataScience
+  - If bucket has fn-terragrunt-state in name, the cost tag is Terraform
+
+schemaVersion: "0.3"
+assumeRole: "{{ AutomationAssumeRole }}"
+parameters:
+  BucketName:
+    type: String
+    description: (Required) Name of the S3 bucket (not the ARN).
+    allowedPattern: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
+  AutomationAssumeRole:
+    type: String
+    description: (Required) ARN of the role that allows Automation to perform the actions
+    allowedPattern: ^arn:(aws[a-zA-Z-]*)?:iam::\d{12}:role/[\w+=,.@-]+
+mainSteps:
+  - name: ChoseTag
+    action: aws:branch
+    inputs:
+      Choices:
+      - NextStep: SetBucketTagsDataScience
+        Variable: "{{BucketName}}"
+        Contains: Sagemaker
+      - NextStep: SetBucketTagsDataScience
+        Variable: "{{BucketName}}"
+        Contains: sagemaker
+      - NextStep: SetBucketTagsTerraform
+        Variable: "{{BucketName}}"
+        StartsWith: fn-terragrunt-state
+      Default:
+        SetBucketTagsEqualName
+  - name: SetBucketTagsDataScience
+    action: "aws:executeAwsApi"
+    isEnd: true
+    inputs:
+      Service: s3
+      Api: PutBucketTagging
+      Bucket: "{{BucketName}}"
+      Tagging:
+        TagSet:
+          - Key: cost
+            Value: DataScience
+    isCritical: true
+    maxAttempts: 2
+    timeoutSeconds: 600
+
+  - name: SetBucketTagsTerraform
+    action: "aws:executeAwsApi"
+    isEnd: true
+    inputs:
+      Service: s3
+      Api: PutBucketTagging
+      Bucket: "{{BucketName}}"
+      Tagging:
+        TagSet:
+          - Key: cost
+            Value: Terraform
+    isCritical: true
+    maxAttempts: 2
+    timeoutSeconds: 600
+
+  - name: SetBucketTagsEqualName
+    action: "aws:executeAwsApi"
+    isEnd: true
+    inputs:
+      Service: s3
+      Api: PutBucketTagging
+      Bucket: "{{BucketName}}"
+      Tagging:
+        TagSet:
+          - Key: cost
+            Value: "{{BucketName}}"
+    isCritical: true
+    maxAttempts: 2
+    timeoutSeconds: 600
