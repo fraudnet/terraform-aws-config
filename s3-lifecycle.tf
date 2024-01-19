@@ -3,6 +3,6 @@ resource "aws_ssm_document" "s3_lifecycle" {
   document_type   = "Automation"
   document_format = "YAML"
 
-  content = templatefile("${path.module}/ConfigureS3BucketLifecycleRule.yaml", {})
+  content = templatefile("${path.module}/automations/ConfigureS3BucketLifecycleRule.yaml", {})
 
 }
