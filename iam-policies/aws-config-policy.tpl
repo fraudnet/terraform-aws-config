@@ -30,7 +30,8 @@
                 "s3:PutBucketPolicy",
                 "s3:GetBucketPolicy",
                 "s3:PutLifecycleConfiguration",
-                "s3:GetLifecycleConfiguration"
+                "s3:GetLifecycleConfiguration",
+                "s3:PutBucketTagging"
             ],
             "Resource": "*"
         }
