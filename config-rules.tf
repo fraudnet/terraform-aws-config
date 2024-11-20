@@ -81,7 +81,7 @@ resource "aws_config_config_rule" "instances-in-vpc" {
 }
 
 resource "aws_config_config_rule" "root-account-mfa-enabled" {
-  count       = var.active == true ? 1 : 0
+  count       = var.active == true && var.region != "me-central-1" ? 1 : 0
   name        = "root-account-mfa-enabled"
   description = "Ensure root AWS account has MFA enabled"
 
@@ -128,7 +128,7 @@ resource "aws_config_config_rule" "ec2-volume-inuse-check" {
 }
 
 resource "aws_config_config_rule" "iam-user-no-policies-check" {
-  count       = var.active == true ? 1 : 0
+  count       = var.active == true && var.region != "me-central-1" ? 1 : 0
   name        = "iam-user-no-policies-check"
   description = "Ensure that none of your IAM users have policies attached. IAM users must inherit permissions from IAM groups or roles."
 
@@ -326,7 +326,7 @@ resource "aws_config_config_rule" "s3-bucket-ssl-requests-only" {
 }
 
 resource "aws_config_remediation_configuration" "s3-bucket-ssl-requests-only" {
-  count            = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
+  count            = var.active == true && var.region != "ap-northeast-3" && var.region != "me-central-1" ? 1 : 0
   config_rule_name = aws_config_config_rule.s3-bucket-ssl-requests-only[0].name
   resource_type    = "AWS::S3::Bucket"
   target_type      = "SSM_DOCUMENT"
