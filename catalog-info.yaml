@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-aws-config
+  annotations:
+    github.com/project-slug: fraudnet/terraform-aws-config
+spec:
+  type: other
+  lifecycle: unknown
+  owner: Developers
