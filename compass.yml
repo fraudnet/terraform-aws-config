@@ -1,0 +1,22 @@
+configVersion: 1
+name: terraform-aws-config
+slug: terraform-aws-config
+description: terraform aws config
+typeId: LIBRARY
+ownerId: ari:cloud:identity::team/2e3e92ff-2674-4087-88ce-4f903ac3b4d3
+fields:
+  lifecycle: Active
+  tier: 4
+  isMonorepoProject: false
+links:
+- name: null
+  type: REPOSITORY
+  url: https://github.com/fraudnet/terraform-aws-config
+- name: ''
+  type: PROJECT
+  url: https://fraudnet.atlassian.net/browse/ND
+relationships:
+  DEPENDS_ON: []
+labels:
+- source:github
+customFields: null
