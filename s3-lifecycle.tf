@@ -33,7 +33,7 @@ resource "aws_config_remediation_configuration" "s3-bucket-expiration" {
 
   parameter {
     name         = "AutomationAssumeRole"
-    static_value = aws_iam_role.remediation.0.arn
+    static_value = var.remediation_role_arn
   }
   parameter {
     name           = "BucketName"
