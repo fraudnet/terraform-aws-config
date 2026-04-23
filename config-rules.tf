@@ -1,8 +1,6 @@
-data "template_file" "aws_config_iam_password_policy" {
-  template = file("${path.module}/config-policies/iam-password-policy.tpl")
-
-  vars = {
-    # terraform will interpolate boolean as 0/1 and the config parameters expect "true" or "false"
+locals {
+  aws_config_iam_password_policy = templatefile("${path.module}/config-policies/iam-password-policy.tpl", {
+    # terraform interpolates booleans as 0/1; AWS Config expects "true" / "false"
     password_require_uppercase = var.password_require_uppercase ? "true" : "false"
     password_require_lowercase = var.password_require_lowercase ? "true" : "false"
     password_require_symbols   = var.password_require_symbols ? "true" : "false"
@@ -10,17 +8,11 @@ data "template_file" "aws_config_iam_password_policy" {
     password_min_length        = var.password_min_length
     password_reuse_prevention  = var.password_reuse_prevention
     password_max_age           = var.password_max_age
-  }
-}
+  })
 
-data "template_file" "aws_config_acm_certificate_expiration" {
-  template = file(
-    "${path.module}/config-policies/acm-certificate-expiration.tpl",
-  )
-
-  vars = {
+  aws_config_acm_certificate_expiration = templatefile("${path.module}/config-policies/acm-certificate-expiration.tpl", {
     acm_days_to_expiration = var.acm_days_to_expiration
-  }
+  })
 }
 
 #
@@ -31,7 +23,7 @@ resource "aws_config_config_rule" "iam-password-policy" {
   count            = var.active == true ? 1 : 0
   name             = "iam-password-policy"
   description      = "Ensure the account password policy for IAM users meets the specified requirements"
-  input_parameters = data.template_file.aws_config_iam_password_policy.rendered
+  input_parameters = local.aws_config_iam_password_policy
 
   source {
     owner             = "AWS"
@@ -102,7 +94,7 @@ resource "aws_config_config_rule" "acm-certificate-expiration-check" {
   count            = var.active == true && var.region != "ap-northeast-3" ? 1 : 0
   name             = "acm-certificate-expiration-check"
   description      = "Ensures ACM Certificates in your account are marked for expiration within the specified number of days"
-  input_parameters = data.template_file.aws_config_acm_certificate_expiration.rendered
+  input_parameters = local.aws_config_acm_certificate_expiration
 
   source {
     owner             = "AWS"
