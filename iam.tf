@@ -5,14 +5,12 @@ data "aws_caller_identity" "current" {
 # put/lifecycle/tagging actions that the Config rule remediations
 # (s3-lifecycle, s3-tags, bucket policy enforcement) execute via SSM
 # Automation. Unchanged from the legacy aws-config-role template.
-data "template_file" "aws_config_policy" {
-  template = file("${path.module}/iam-policies/aws-config-policy.tpl")
-
-  vars = {
+locals {
+  aws_config_policy = templatefile("${path.module}/iam-policies/aws-config-policy.tpl", {
     config_logs_bucket = var.config_logs_bucket
     config_logs_prefix = var.config_logs_prefix
     account_id         = data.aws_caller_identity.current.account_id
-  }
+  })
 }
 
 data "aws_iam_policy_document" "remediation-trust" {
@@ -35,7 +33,7 @@ resource "aws_iam_role" "remediation" {
 resource "aws_iam_policy" "remediation" {
   count  = var.active == true ? 1 : 0
   name   = "aws-config-remediation-policy-${var.region}"
-  policy = data.template_file.aws_config_policy.rendered
+  policy = local.aws_config_policy
 }
 
 resource "aws_iam_policy_attachment" "remediation" {
