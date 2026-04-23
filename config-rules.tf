@@ -229,7 +229,7 @@ resource "aws_config_remediation_configuration" "s3-bucket-server-side-encryptio
 
   parameter {
     name         = "AutomationAssumeRole"
-    static_value = aws_iam_role.remediation.0.arn
+    static_value = var.remediation_role_arn
   }
   parameter {
     name           = "BucketName"
@@ -281,7 +281,7 @@ resource "aws_config_remediation_configuration" "s3-bucket-versioning-enabled" {
 
   parameter {
     name         = "AutomationAssumeRole"
-    static_value = aws_iam_role.remediation.0.arn
+    static_value = var.remediation_role_arn
   }
   parameter {
     name           = "BucketName"
@@ -327,7 +327,7 @@ resource "aws_config_remediation_configuration" "s3-bucket-ssl-requests-only" {
 
   parameter {
     name         = "AutomationAssumeRole"
-    static_value = aws_iam_role.remediation.0.arn
+    static_value = var.remediation_role_arn
   }
   parameter {
     name           = "BucketName"

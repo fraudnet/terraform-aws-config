@@ -85,3 +85,8 @@ variable "config_role_arn" {
   type        = string
 }
 
+variable "remediation_role_arn" {
+  description = "ARN of the IAM role SSM Automation assumes when running Config rule remediations. Provisioned once per account by the parent module."
+  type        = string
+}
+
