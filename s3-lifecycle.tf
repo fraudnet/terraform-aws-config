@@ -29,11 +29,11 @@ resource "aws_config_remediation_configuration" "s3-bucket-expiration" {
   resource_type    = "AWS::S3::Bucket"
   target_type      = "SSM_DOCUMENT"
   target_id        = aws_ssm_document.s3_lifecycle.name
-  target_version = "$DEFAULT"
+  target_version   = "$DEFAULT"
 
   parameter {
     name         = "AutomationAssumeRole"
-    static_value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-config-role-${var.region}"
+    static_value = aws_iam_role.remediation.0.arn
   }
   parameter {
     name           = "BucketName"

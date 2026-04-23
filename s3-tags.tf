@@ -21,9 +21,9 @@ resource "aws_config_config_rule" "s3-bucket-tags" {
   scope {
     compliance_resource_types = ["AWS::S3::Bucket"]
   }
-  
-  
-  input_parameters= <<EOF
+
+
+  input_parameters = <<EOF
 {
 	"tag1Key": "cost"
 }
@@ -33,22 +33,22 @@ EOF
 }
 
 resource "aws_config_remediation_configuration" "s3-bucket-tags" {
-  count            = var.active == true  ? 1 : 0 # && var.region != "ap-northeast-3" ? 1 : 0
+  count            = var.active == true ? 1 : 0 # && var.region != "ap-northeast-3" ? 1 : 0
   config_rule_name = aws_config_config_rule.s3-bucket-tags[0].name
   resource_type    = "AWS::S3::Bucket"
   target_type      = "SSM_DOCUMENT"
   target_id        = aws_ssm_document.s3_tags.name
-  target_version = "$DEFAULT"
+  target_version   = "$DEFAULT"
 
   parameter {
     name         = "AutomationAssumeRole"
-    static_value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-config-role-${var.region}"
+    static_value = aws_iam_role.remediation.0.arn
   }
   parameter {
     name           = "BucketName"
     resource_value = "RESOURCE_ID"
   }
-  
+
   automatic                  = true
   maximum_automatic_attempts = 5
   retry_attempt_seconds      = 600

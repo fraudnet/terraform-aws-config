@@ -80,3 +80,8 @@ variable "active" {
   default = true
 }
 
+variable "config_role_arn" {
+  description = "ARN of the IAM role the Config recorder assumes. Expected: the AWSServiceRoleForConfig SLR, provisioned once per account by the parent module."
+  type        = string
+}
+
